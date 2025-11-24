@@ -5,7 +5,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
-import { Plus, Trash2, Clock, CalendarDays, ChevronLeft, ChevronRight, Edit2, Coffee, Utensils } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Plus, Trash2, Clock, CalendarDays, ChevronLeft, ChevronRight, Edit2, Coffee, Utensils, Repeat } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { toast } from "sonner@2.0.3";
 
@@ -19,6 +20,7 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
     title: "",
     startTime: "",
     endTime: "",
+    recurrence: "none" as "none" | "weekly" | "monthly",
   });
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -27,13 +29,79 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const selectedDateStr = selectedDate.toISOString().split("T")[0];
-  const selectedDateEvents = events
-    .filter((e) => e.date === selectedDateStr)
-    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+  
+  // Get all events including recurring ones
+  const getAllEventsForDate = (dateStr: string): CalendarEvent[] => {
+    const targetDate = new Date(dateStr);
+    const result: CalendarEvent[] = [];
+
+    events.forEach((event) => {
+      const eventDate = new Date(event.date);
+      
+      if (event.date === dateStr) {
+        result.push(event);
+      } else if (event.recurrence === "weekly") {
+        const daysDiff = Math.floor((targetDate.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysDiff > 0 && daysDiff % 7 === 0) {
+          result.push(event);
+        }
+      } else if (event.recurrence === "monthly") {
+        if (targetDate.getDate() === eventDate.getDate() && targetDate > eventDate) {
+          result.push(event);
+        }
+      }
+    });
+
+    return result.sort((a, b) => a.startTime.localeCompare(b.startTime));
+  };
+
+  const selectedDateEvents = getAllEventsForDate(selectedDateStr);
+
+  const checkTimeConflict = (startTime: string, endTime: string, excludeId?: string): boolean => {
+    // Get events for the selected date
+    const dateEvents = getAllEventsForDate(selectedDateStr).filter(e => e.id !== excludeId);
+    
+    const [newStartHour, newStartMin] = startTime.split(":").map(Number);
+    const [newEndHour, newEndMin] = endTime.split(":").map(Number);
+    const newStart = newStartHour * 60 + newStartMin;
+    const newEnd = newEndHour * 60 + newEndMin;
+
+    // Check if new event overlaps with any existing event
+    for (const event of dateEvents) {
+      const [existingStartHour, existingStartMin] = event.startTime.split(":").map(Number);
+      const [existingEndHour, existingEndMin] = event.endTime.split(":").map(Number);
+      const existingStart = existingStartHour * 60 + existingStartMin;
+      const existingEnd = existingEndHour * 60 + existingEndMin;
+
+      // Check for overlap
+      if (
+        (newStart >= existingStart && newStart < existingEnd) || // New event starts during existing event
+        (newEnd > existingStart && newEnd <= existingEnd) || // New event ends during existing event
+        (newStart <= existingStart && newEnd >= existingEnd) // New event completely overlaps existing event
+      ) {
+        return true; // Conflict found
+      }
+    }
+    return false; // No conflict
+  };
 
   const addEvent = () => {
     if (!newEvent.title || !newEvent.startTime || !newEvent.endTime) {
       toast.error("Por favor completa todos los campos");
+      return;
+    }
+
+    // Validate time logic
+    if (newEvent.startTime >= newEvent.endTime) {
+      toast.error("La hora de inicio debe ser antes de la hora de fin");
+      return;
+    }
+
+    // Check for time conflicts
+    if (checkTimeConflict(newEvent.startTime, newEvent.endTime)) {
+      toast.error("Conflicto de horario", {
+        description: "Ya existe un evento en este período de tiempo",
+      });
       return;
     }
 
@@ -43,18 +111,38 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
       startTime: newEvent.startTime,
       endTime: newEvent.endTime,
       date: selectedDateStr,
+      recurrence: newEvent.recurrence,
     };
 
     setEvents([...events, event]);
-    setNewEvent({ title: "", startTime: "", endTime: "" });
+    setNewEvent({ title: "", startTime: "", endTime: "", recurrence: "none" });
     setIsDialogOpen(false);
+    
+    const recurrenceText = 
+      newEvent.recurrence === "weekly" ? " (se repetirá semanalmente)" :
+      newEvent.recurrence === "monthly" ? " (se repetirá mensualmente)" : "";
+    
     toast.success("Evento agregado", {
-      description: `${newEvent.title} ha sido agregado a tu agenda`,
+      description: `${newEvent.title} ha sido agregado a tu agenda${recurrenceText}`,
     });
   };
 
   const updateEvent = () => {
     if (!editingEvent) return;
+    
+    // Validate time logic
+    if (editingEvent.startTime >= editingEvent.endTime) {
+      toast.error("La hora de inicio debe ser antes de la hora de fin");
+      return;
+    }
+
+    // Check for time conflicts (excluding the event being edited)
+    if (checkTimeConflict(editingEvent.startTime, editingEvent.endTime, editingEvent.id)) {
+      toast.error("Conflicto de horario", {
+        description: "Ya existe un evento en este período de tiempo",
+      });
+      return;
+    }
     
     const updatedEvents = events.map((e) =>
       e.id === editingEvent.id ? editingEvent : e
@@ -303,6 +391,24 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
                       />
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="recurrence" className="text-sm">Repetir</Label>
+                    <Select
+                      value={newEvent.recurrence}
+                      onValueChange={(value: "none" | "weekly" | "monthly") => 
+                        setNewEvent({ ...newEvent, recurrence: value })
+                      }
+                    >
+                      <SelectTrigger className="text-sm">
+                        <SelectValue placeholder="No repetir" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none" className="text-sm">No repetir</SelectItem>
+                        <SelectItem value="weekly" className="text-sm">Semanalmente</SelectItem>
+                        <SelectItem value="monthly" className="text-sm">Mensualmente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button onClick={addEvent} className="w-full text-sm">
                     Agregar evento
                   </Button>
@@ -324,7 +430,15 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
                   className="flex items-start justify-between p-3 bg-orange-50 rounded-lg border border-orange-100"
                 >
                   <div className="flex-1">
-                    <p className="text-sm">{event.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm">{event.title}</p>
+                      {event.recurrence && event.recurrence !== "none" && (
+                        <Badge variant="outline" className="text-xs flex items-center gap-1">
+                          <Repeat className="size-3" />
+                          {event.recurrence === "weekly" ? "Semanal" : "Mensual"}
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1 text-orange-600">
                       <Clock className="size-3" />
                       <span className="text-xs">

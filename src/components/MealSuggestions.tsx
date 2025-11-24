@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame, Leaf, Coins, User } from "lucide-react";
+import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame, Leaf, Coins, User, Bot } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { ProfileForm } from "./ProfileForm";
+import { AIAssistant } from "./AIAssistant";
 import { toast } from "sonner@2.0.3";
 
 interface MealSuggestionsProps {
@@ -159,6 +160,7 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
   const [suggestions, setSuggestions] = useState<Array<{ slot: any; food: FoodOption }>>([]);
   const [rejectedFoodIds, setRejectedFoodIds] = useState<Set<string>>(new Set());
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
 
   useEffect(() => {
     generateSuggestions();
@@ -336,6 +338,31 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
             profile={profile} 
             setProfile={setProfile} 
             onClose={() => setIsProfileDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Floating AI Assistant Button */}
+      <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
+        <DialogTrigger asChild>
+          <Button
+            className="fixed top-4 left-4 size-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg z-50"
+            size="icon"
+          >
+            <Bot className="size-6" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl p-0 gap-0 max-h-[85vh] overflow-hidden">
+          <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="size-5 text-purple-600" />
+              Asistente Virtual con IA
+            </DialogTitle>
+          </DialogHeader>
+          <AIAssistant 
+            profile={profile} 
+            setProfile={setProfile}
+            onClose={() => setIsAIDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>

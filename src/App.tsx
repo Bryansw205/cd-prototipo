@@ -15,6 +15,7 @@ export interface CalendarEvent {
   startTime: string; // HH:MM format
   endTime: string;
   date: string; // YYYY-MM-DD
+  recurrence?: "none" | "weekly" | "monthly";
 }
 
 export interface FoodOption {
@@ -174,19 +175,19 @@ export default function App() {
 
           {/* Bottom Navigation */}
           <TabsList className="fixed bottom-0 left-0 right-0 grid w-full grid-cols-4 h-16 rounded-none border-t bg-white shadow-lg">
-            <TabsTrigger value="suggestions" className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
+            <TabsTrigger value="suggestions" className="flex flex-col items-center gap-1 py-2 px-1 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
               <UtensilsCrossed className="size-5" />
               <span className="text-xs">Sugerencias</span>
             </TabsTrigger>
-            <TabsTrigger value="calendar" className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
+            <TabsTrigger value="calendar" className="flex flex-col items-center gap-1 py-2 px-1 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
               <Calendar className="size-5" />
               <span className="text-xs">Agenda</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
+            <TabsTrigger value="preferences" className="flex flex-col items-center gap-1 py-2 px-1 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
               <Settings className="size-5" />
               <span className="text-xs">Preferencias</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
+            <TabsTrigger value="history" className="flex flex-col items-center gap-1 py-2 px-1 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600">
               <History className="size-5" />
               <span className="text-xs">Historial</span>
             </TabsTrigger>
