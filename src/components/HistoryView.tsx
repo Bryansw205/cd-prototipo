@@ -53,51 +53,51 @@ export function HistoryView({ history }: HistoryViewProps) {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Total</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Total</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="size-4 text-blue-600" />
-              <p className="text-lg text-blue-600">{history.length}</p>
+              <p className="text-lg sm:text-xl text-blue-600">{history.length}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Aceptadas</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Aceptadas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <ThumbsUp className="size-4 text-green-600" />
-              <p className="text-lg text-green-600">{acceptedMeals.length}</p>
+              <p className="text-lg sm:text-xl text-green-600">{acceptedMeals.length}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Favoritas</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Favoritas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <ThumbsUp className="size-4 text-orange-600" />
-              <p className="text-lg text-orange-600">{likedMeals.length}</p>
+              <p className="text-lg sm:text-xl text-orange-600">{likedMeals.length}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Gasto promedio</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Gasto promedio</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Coins className="size-4 text-purple-600" />
-              <p className="text-lg text-purple-600">S/ {avgPrice.toFixed(0)}</p>
+              <p className="text-lg sm:text-xl text-purple-600">S/ {avgPrice.toFixed(0)}</p>
             </div>
           </CardContent>
         </Card>
@@ -107,13 +107,13 @@ export function HistoryView({ history }: HistoryViewProps) {
       {topCategories.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Tus categorías favoritas</CardTitle>
-            <CardDescription className="text-xs">Basado en tus comidas aceptadas</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Tus categorías favoritas</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Basado en tus comidas aceptadas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {topCategories.map(([category, count]) => (
-                <Badge key={category} className="bg-orange-600 text-xs">
+                <Badge key={category} className="bg-orange-600 text-xs sm:text-sm">
                   {category} ({count})
                 </Badge>
               ))}
@@ -125,15 +125,15 @@ export function HistoryView({ history }: HistoryViewProps) {
       {/* History List */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Historial completo</CardTitle>
-          <CardDescription className="text-xs">Todas tus decisiones</CardDescription>
+          <CardTitle className="text-base sm:text-lg">Historial completo</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Todas tus decisiones</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {history.map((entry, idx) => (
               <div key={entry.id}>
                 <div className="flex gap-3">
-                  <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0">
                     <ImageWithFallback
                       src={entry.foodOption.image}
                       alt={entry.foodOption.name}
@@ -159,15 +159,15 @@ export function HistoryView({ history }: HistoryViewProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
-                        <p className="text-sm">{entry.foodOption.name}</p>
-                        <p className="text-xs text-gray-600">{entry.foodOption.restaurant}</p>
+                        <p className="text-sm sm:text-base">{entry.foodOption.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{entry.foodOption.restaurant}</p>
                       </div>
-                      <Badge variant={entry.accepted ? "default" : "outline"} className="text-xs">
+                      <Badge variant={entry.accepted ? "default" : "outline"} className="text-xs sm:text-sm">
                         {entry.accepted ? "Sí" : "No"}
                       </Badge>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mt-1.5 text-xs text-gray-600">
+                    <div className="flex flex-wrap gap-2 mt-1.5 text-xs sm:text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <Clock className="size-3" />
                         <span>{entry.suggestedFor}</span>
@@ -178,7 +178,7 @@ export function HistoryView({ history }: HistoryViewProps) {
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-400 mt-1">
                       {new Date(entry.timestamp).toLocaleString("es-ES", {
                         day: "numeric",
                         month: "short",
@@ -200,8 +200,8 @@ export function HistoryView({ history }: HistoryViewProps) {
       <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
         <CardContent className="p-4">
           <div className="text-center space-y-1">
-            <p className="text-xs">💡 Insight</p>
-            <p className="text-xs text-gray-700">
+            <p className="text-xs sm:text-sm">💡 Insight</p>
+            <p className="text-xs sm:text-sm text-gray-700">
               {acceptedMeals.length > 0
                 ? `Has aceptado ${acceptedMeals.length} comidas. ${likedMeals.length > 0 ? `¡${likedMeals.length} te encantaron!` : "Marca favoritas para mejorar."}`
                 : "Acepta sugerencias para obtener insights."}

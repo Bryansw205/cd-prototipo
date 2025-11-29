@@ -95,15 +95,15 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <User className="size-4 text-orange-600" />
             Datos personales
           </CardTitle>
-          <CardDescription className="text-xs">Completa tu información básica</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Completa tu información básica</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="name" className="text-sm flex items-center gap-2 mb-1">
+            <Label htmlFor="name" className="text-sm sm:text-base flex items-center gap-2 mb-1">
               <User className="size-3" />
               Nombre completo
             </Label>
@@ -112,12 +112,12 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
               value={localProfile.name}
               onChange={(e) => setLocalProfile({ ...localProfile, name: e.target.value })}
               placeholder="Tu nombre"
-              className="text-sm"
+              className="text-sm sm:text-base"
             />
           </div>
 
           <div>
-            <Label htmlFor="age" className="text-sm flex items-center gap-2 mb-1">
+            <Label htmlFor="age" className="text-sm sm:text-base flex items-center gap-2 mb-1">
               <Calendar className="size-3" />
               Edad
             </Label>
@@ -128,13 +128,13 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
               value={localProfile.age}
               onChange={(e) => handleNumberInput(e.target.value, 'age')}
               placeholder="Ej: 25"
-              className="text-sm"
+              className="text-sm sm:text-base"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="weight" className="text-sm flex items-center gap-2 mb-1">
+              <Label htmlFor="weight" className="text-sm sm:text-base flex items-center gap-2 mb-1">
                 <Scale className="size-3" />
                 Peso (kg)
               </Label>
@@ -145,12 +145,12 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
                 value={localProfile.weight}
                 onChange={(e) => handleNumberInput(e.target.value, 'weight')}
                 placeholder="70"
-                className="text-sm"
+                className="text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <Label htmlFor="height" className="text-sm flex items-center gap-2 mb-1">
+              <Label htmlFor="height" className="text-sm sm:text-base flex items-center gap-2 mb-1">
                 <Ruler className="size-3" />
                 Talla (cm)
               </Label>
@@ -161,13 +161,13 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
                 value={localProfile.height}
                 onChange={(e) => handleNumberInput(e.target.value, 'height')}
                 placeholder="170"
-                className="text-sm"
+                className="text-sm sm:text-base"
               />
             </div>
           </div>
 
           <div>
-            <Label className="text-sm flex items-center gap-2 mb-1">
+            <Label className="text-sm sm:text-base flex items-center gap-2 mb-1">
               <MapPin className="size-3" />
               Ubicación
             </Label>
@@ -180,13 +180,12 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
                   setLocalProfile({ ...localProfile, location: "" });
                 }}
               >
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-sm sm:text-base">
                   <SelectValue placeholder="Selecciona departamento" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.keys(departmentProvinces).map((dept) => (
-                    <SelectItem key={dept} value={dept} className="text-sm">
-                      {dept}
+                                          <SelectItem key={dept} value={dept} className="text-sm sm:text-base">                      {dept}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -200,12 +199,12 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
                     handleLocationChange(selectedDepartment, value);
                   }}
                 >
-                  <SelectTrigger className="text-sm">
+                  <SelectTrigger className="text-sm sm:text-base">
                     <SelectValue placeholder="Selecciona provincia" />
                   </SelectTrigger>
                   <SelectContent>
                     {departmentProvinces[selectedDepartment].map((prov) => (
-                      <SelectItem key={prov} value={prov} className="text-sm">
+                      <SelectItem key={prov} value={prov} className="text-sm sm:text-base">
                         {prov}
                       </SelectItem>
                     ))}
@@ -219,7 +218,7 @@ export function ProfileForm({ profile, setProfile, onClose }: ProfileFormProps) 
 
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-4">
-          <p className="text-xs text-blue-800 text-center">
+          <p className="text-xs sm:text-sm text-blue-800 text-center">
             ℹ️ Esta información nos ayuda a personalizar mejor tus sugerencias de comida
           </p>
         </CardContent>

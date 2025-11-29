@@ -385,7 +385,7 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         <p className="text-sm text-gray-600">Basadas en tu agenda</p>
       </div>
 
-      <Carousel className="w-full max-w-xs">
+      <Carousel className="w-full max-w-sm sm:max-w-md mx-auto">
         <CarouselContent>
           {suggestions.map((suggestion, idx) => (
             <CarouselItem key={idx}>
@@ -405,8 +405,8 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
                 </div>
 
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{suggestion.food.name}</CardTitle>
-                  <CardDescription className="text-sm">{suggestion.food.restaurant}</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">{suggestion.food.name}</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">{suggestion.food.restaurant}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-3">
@@ -425,22 +425,22 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
                   </div>
 
                   {/* Details */}
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                     <div className="flex items-center gap-1.5">
                       <Bike className="size-4 text-gray-500" />
-                      <span className="text-xs">{suggestion.food.deliveryTime} min</span>
+                      <span className="text-xs sm:text-sm">{suggestion.food.deliveryTime} min</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Coins className="size-4 text-green-600" />
-                      <span className="text-xs">S/ {suggestion.food.price}</span>
+                      <span className="text-xs sm:text-sm">S/ {suggestion.food.price}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       {suggestion.food.portable ? <Flame className="size-4 text-orange-500" /> : <Leaf className="size-4 text-green-500" />}
-                      <span className="text-xs">{suggestion.food.portable ? "Portable" : "Para sentarse"}</span>
+                      <span className="text-xs sm:text-sm">{suggestion.food.portable ? "Portable" : "Para sentarse"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <MapPin className="size-4 text-gray-500" />
-                      <span className="text-xs">{suggestion.food.category}</span>
+                      <span className="text-xs sm:text-sm">{suggestion.food.category}</span>
                     </div>
                   </div>
 
@@ -450,14 +450,14 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
                       variant="outline"
                       size="sm"
                       onClick={() => handleReject(idx)}
-                      className="text-xs"
+                      className="text-xs sm:text-sm"
                     >
                       <X className="size-3 mr-1" />
                       No
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-orange-600 hover:bg-orange-700 text-xs"
+                      className="bg-orange-600 hover:bg-orange-700 text-xs sm:text-sm"
                       onClick={() => handleAccept(suggestion, true)}
                     >
                       <ThumbsUp className="size-3 mr-1" />

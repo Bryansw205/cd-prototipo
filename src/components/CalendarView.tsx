@@ -736,82 +736,84 @@ export function CalendarView({ events, setEvents }: CalendarViewProps) {
               </div>
             </CardHeader>
             <CardContent className="p-0 pb-3">
-              <div className="w-full" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchEnd={handleMouseUp}>
-                {/* Week header */}
-                <div className="grid grid-cols-8 border-b bg-white z-10">
-                  <div className="p-1 text-[10px] text-gray-500 border-r flex items-center justify-center">S.</div>
-                  {weekDaysArray.map((date, idx) => {
-                    const isCurrentDay = isToday(date);
-                    return (
-                      <div key={idx} className={`p-1 text-center border-l ${isCurrentDay ? 'bg-pink-100' : ''}`}>
-                        <div className="text-[10px] text-gray-500">{weekDays[date.getDay()].toUpperCase()}</div>
-                        <div className={`text-sm ${isCurrentDay ? 'text-pink-600 font-bold' : ''}`}>
-                          {date.getDate()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Time slots */}
-                {hours.map((hour) => (
-                  <div key={hour} className="grid grid-cols-8 border-b relative">
-                    <div className="p-1 text-[10px] text-gray-400 border-r flex items-start justify-center pt-1">
-                      {hour}
-                    </div>
-                    {weekDaysArray.map((date, dayIdx) => {
-                      const eventsInSlot = getEventsForTimeSlot(date, hour);
-                      const isInRange = isInDragRange(dayIdx, hour);
+              <div className="overflow-x-auto">
+                <div className="w-full min-w-[600px]" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchEnd={handleMouseUp}>
+                  {/* Week header */}
+                  <div className="grid grid-cols-8 border-b bg-white z-10">
+                    <div className="p-1 text-[10px] sm:text-xs text-gray-500 border-r flex items-center justify-center">S.</div>
+                    {weekDaysArray.map((date, idx) => {
                       const isCurrentDay = isToday(date);
-                      
                       return (
-                        <div
-                          key={dayIdx}
-                          className={`border-l min-h-[50px] relative cursor-pointer transition-colors ${
-                            isInRange ? 'bg-pink-300' : isCurrentDay ? 'bg-pink-50/50' : 'hover:bg-gray-50'
-                          }`}
-                          onMouseDown={() => handleMouseDown(dayIdx, hour, date)}
-                          onMouseEnter={() => handleMouseEnter(dayIdx, hour)}
-                          onTouchStart={() => handleMouseDown(dayIdx, hour, date)}
-                          onTouchMove={(e) => {
-                            const touch = e.touches[0];
-                            const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                            if (element) {
-                              const cell = element.closest('[data-hour]');
-                              if (cell) {
-                                const hour = parseInt(cell.getAttribute('data-hour') || '0');
-                                const day = parseInt(cell.getAttribute('data-day') || '0');
-                                handleMouseEnter(day, hour);
-                              }
-                            }
-                          }}
-                          data-hour={hour}
-                          data-day={dayIdx}
-                        >
-                          {eventsInSlot.map((event, idx) => (
-                            <div
-                              key={event.id}
-                              className="absolute inset-x-0.5 bg-green-200 border border-green-300 rounded px-0.5 text-[9px] overflow-hidden flex items-center justify-center"
-                              style={{
-                                top: `${idx * 2}px`,
-                                zIndex: 5,
-                              }}
-                            >
-                              <div className="truncate">{event.title}</div>
-                            </div>
-                          ))}
+                        <div key={idx} className={`p-1 text-center border-l ${isCurrentDay ? 'bg-pink-100' : ''}`}>
+                          <div className="text-[10px] sm:text-xs text-gray-500">{weekDays[date.getDay()].toUpperCase()}</div>
+                          <div className={`text-sm ${isCurrentDay ? 'text-pink-600 font-bold' : ''}`}>
+                            {date.getDate()}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
-                ))}
 
-                {/* Drag tooltip */}
-                {isDragging && dragStart && dragEnd && (
-                  <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg z-50 pointer-events-none text-sm">
-                    {getDragRangeDisplay()}
-                  </div>
-                )}
+                  {/* Time slots */}
+                  {hours.map((hour) => (
+                    <div key={hour} className="grid grid-cols-8 border-b relative">
+                      <div className="p-1 text-[10px] sm:text-xs text-gray-400 border-r flex items-start justify-center pt-1">
+                        {hour}
+                      </div>
+                      {weekDaysArray.map((date, dayIdx) => {
+                        const eventsInSlot = getEventsForTimeSlot(date, hour);
+                        const isInRange = isInDragRange(dayIdx, hour);
+                        const isCurrentDay = isToday(date);
+                        
+                        return (
+                          <div
+                            key={dayIdx}
+                            className={`border-l min-h-[50px] relative cursor-pointer transition-colors ${
+                              isInRange ? 'bg-pink-300' : isCurrentDay ? 'bg-pink-50/50' : 'hover:bg-gray-50'
+                            }`}
+                            onMouseDown={() => handleMouseDown(dayIdx, hour, date)}
+                            onMouseEnter={() => handleMouseEnter(dayIdx, hour)}
+                            onTouchStart={() => handleMouseDown(dayIdx, hour, date)}
+                            onTouchMove={(e) => {
+                              const touch = e.touches[0];
+                              const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                              if (element) {
+                                const cell = element.closest('[data-hour]');
+                                if (cell) {
+                                  const hour = parseInt(cell.getAttribute('data-hour') || '0');
+                                  const day = parseInt(cell.getAttribute('data-day') || '0');
+                                  handleMouseEnter(day, hour);
+                                }
+                              }
+                            }}
+                            data-hour={hour}
+                            data-day={dayIdx}
+                          >
+                            {eventsInSlot.map((event, idx) => (
+                              <div
+                                key={event.id}
+                                className="absolute inset-x-0.5 bg-green-200 border border-green-300 rounded px-0.5 text-[9px] sm:text-xs overflow-hidden flex items-center justify-center"
+                                style={{
+                                  top: `${idx * 2}px`,
+                                  zIndex: 5,
+                                }}
+                              >
+                                <div className="truncate">{event.title}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+
+                  {/* Drag tooltip */}
+                  {isDragging && dragStart && dragEnd && (
+                    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg z-50 pointer-events-none text-sm">
+                      {getDragRangeDisplay()}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="px-4 pt-3 text-xs text-gray-600 text-center">

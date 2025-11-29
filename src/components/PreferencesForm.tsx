@@ -82,11 +82,11 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
       {/* Favorite Categories */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Heart className="size-4 text-red-500" />
             Tipos de comida favorita
           </CardTitle>
-          <CardDescription className="text-xs">Selecciona tus favoritos</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Selecciona tus favoritos</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
               <Badge
                 key={category}
                 variant={localPreferences.favoriteCategories.includes(category) ? "default" : "outline"}
-                className={`cursor-pointer transition-colors text-xs ${
+                className={`cursor-pointer transition-colors text-xs sm:text-sm ${
                   localPreferences.favoriteCategories.includes(category)
                     ? "bg-orange-600 hover:bg-orange-700"
                     : "hover:bg-orange-50"
@@ -111,11 +111,11 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
       {/* Dietary Restrictions */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <ShieldAlert className="size-4 text-amber-500" />
             Restricciones alimentarias
           </CardTitle>
-          <CardDescription className="text-xs">Tus restricciones dietéticas</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Tus restricciones dietéticas</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
@@ -123,7 +123,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
               <Badge
                 key={restriction}
                 variant={localPreferences.restrictions.includes(restriction) ? "default" : "outline"}
-                className={`cursor-pointer transition-colors text-xs ${
+                className={`cursor-pointer transition-colors text-xs sm:text-sm ${
                   localPreferences.restrictions.includes(restriction)
                     ? "bg-red-600 hover:bg-red-700"
                     : "hover:bg-red-50"
@@ -140,15 +140,15 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
       {/* Budget */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Coins className="size-4 text-green-600" />
             Presupuesto por comida
           </CardTitle>
-          <CardDescription className="text-xs">Cuánto estás dispuesto a gastar</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Cuánto estás dispuesto a gastar</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3">
-            <Label htmlFor="budget" className="text-sm">
+            <Label htmlFor="budget" className="text-sm sm:text-base">
               Máximo:
             </Label>
             <Input
@@ -160,7 +160,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
               onChange={(e) =>
                 handleBudgetChange(Number(e.target.value))
               }
-              className="max-w-24 text-sm"
+              className="max-w-24 sm:max-w-xs text-sm"
             />
             <span className="text-sm text-gray-600">soles</span>
           </div>
@@ -174,18 +174,18 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
       {/* Eating Preferences */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Utensils className="size-4 text-blue-600" />
             Preferencias de consumo
           </CardTitle>
-          <CardDescription className="text-xs">Cómo prefieres comer</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Cómo prefieres comer</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
               <Coffee className="size-4 text-gray-600" />
               <div>
-                <Label htmlFor="walking" className="cursor-pointer text-sm">
+                <Label htmlFor="walking" className="cursor-pointer text-sm sm:text-base">
                   Puedo comer caminando
                 </Label>
                 <p className="text-xs text-gray-500">Acepto comida portable</p>
@@ -204,7 +204,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
             <div className="flex items-center gap-2">
               <Utensils className="size-4 text-gray-600" />
               <div>
-                <Label htmlFor="class" className="cursor-pointer text-sm">
+                <Label htmlFor="class" className="cursor-pointer text-sm sm:text-base">
                   Puedo comer en clase/trabajo
                 </Label>
                 <p className="text-xs text-gray-500">Acepto comida discreta</p>
