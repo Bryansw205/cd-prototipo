@@ -6,10 +6,17 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame, Leaf, Coins, User, Bot } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { ProfileForm } from "./ProfileForm";
 import { AIAssistant } from "./AIAssistant";
 import { toast } from "sonner@2.0.3";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel";
 
 interface MealSuggestionsProps {
   events: CalendarEvent[];
@@ -320,7 +327,7 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
   }
 
   return (
-    <div className="space-y-4 relative">
+    <div className="space-y-4 relative overflow-x-hidden">
       {/* Floating Profile Button */}
       <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
         <DialogTrigger asChild>
@@ -333,6 +340,9 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Mi Perfil</DialogTitle>
+            <DialogDescription>
+              Configura tu información personal y preferencias
+            </DialogDescription>
           </DialogHeader>
           <ProfileForm 
             profile={profile} 
@@ -342,11 +352,11 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         </DialogContent>
       </Dialog>
 
-      {/* Floating AI Assistant Button */}
+      {/* Floating AI Assistant Button - Bottom Right */}
       <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
         <DialogTrigger asChild>
           <Button
-            className="fixed top-4 left-4 size-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg z-50"
+            className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50"
             size="icon"
           >
             <Bot className="size-6" />
@@ -358,6 +368,9 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
               <Bot className="size-5 text-purple-600" />
               Asistente Virtual con IA
             </DialogTitle>
+            <DialogDescription className="text-purple-700">
+              Consulta sobre alimentación, nutrición y recomendaciones personalizadas
+            </DialogDescription>
           </DialogHeader>
           <AIAssistant 
             profile={profile} 
@@ -372,86 +385,94 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         <p className="text-sm text-gray-600">Basadas en tu agenda</p>
       </div>
 
-      <div className="space-y-4">
-        {suggestions.map((suggestion, idx) => (
-          <Card key={idx} className="overflow-hidden">
-            <div className="relative h-40">
-              <ImageWithFallback
-                src={suggestion.food.image}
-                alt={suggestion.food.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-2 right-2">
-                <Badge className="bg-orange-600 text-white text-xs">
-                  {getSlotTypeLabel(suggestion.slot.duration)}
-                </Badge>
-              </div>
-            </div>
-
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">{suggestion.food.name}</CardTitle>
-              <CardDescription className="text-sm">{suggestion.food.restaurant}</CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              {/* Time slot */}
-              <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="size-4 text-blue-600" />
-                  <div>
-                    <p className="text-xs text-gray-600">Momento sugerido</p>
-                    <p className="text-sm">
-                      {suggestion.slot.start} - {suggestion.slot.end}
-                    </p>
+      <Carousel className="w-full max-w-xs">
+        <CarouselContent>
+          {suggestions.map((suggestion, idx) => (
+            <CarouselItem key={idx}>
+              <div className="p-1">
+              <Card className="overflow-hidden">
+                <div className="relative h-40">
+                  <ImageWithFallback
+                    src={suggestion.food.image}
+                    alt={suggestion.food.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Badge className="bg-orange-600 text-white text-xs">
+                      {getSlotTypeLabel(suggestion.slot.duration)}
+                    </Badge>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-xs">{suggestion.slot.duration} min</Badge>
-              </div>
 
-              {/* Details */}
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Bike className="size-4 text-gray-500" />
-                  <span className="text-xs">{suggestion.food.deliveryTime} min</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Coins className="size-4 text-green-600" />
-                  <span className="text-xs">S/ {suggestion.food.price}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {suggestion.food.portable ? <Flame className="size-4 text-orange-500" /> : <Leaf className="size-4 text-green-500" />}
-                  <span className="text-xs">{suggestion.food.portable ? "Portable" : "Para sentarse"}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="size-4 text-gray-500" />
-                  <span className="text-xs">{suggestion.food.category}</span>
-                </div>
-              </div>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{suggestion.food.name}</CardTitle>
+                  <CardDescription className="text-sm">{suggestion.food.restaurant}</CardDescription>
+                </CardHeader>
 
-              {/* Actions */}
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleReject(idx)}
-                  className="text-xs"
-                >
-                  <X className="size-3 mr-1" />
-                  No
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700 text-xs"
-                  onClick={() => handleAccept(suggestion, true)}
-                >
-                  <ThumbsUp className="size-3 mr-1" />
-                  Ordenar
-                </Button>
+                <CardContent className="space-y-3">
+                  {/* Time slot */}
+                  <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-4 text-blue-600" />
+                      <div>
+                        <p className="text-xs text-gray-600">Momento sugerido</p>
+                        <p className="text-sm">
+                          {suggestion.slot.start} - {suggestion.slot.end}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">{suggestion.slot.duration} min</Badge>
+                  </div>
+
+                  {/* Details */}
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <Bike className="size-4 text-gray-500" />
+                      <span className="text-xs">{suggestion.food.deliveryTime} min</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Coins className="size-4 text-green-600" />
+                      <span className="text-xs">S/ {suggestion.food.price}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {suggestion.food.portable ? <Flame className="size-4 text-orange-500" /> : <Leaf className="size-4 text-green-500" />}
+                      <span className="text-xs">{suggestion.food.portable ? "Portable" : "Para sentarse"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="size-4 text-gray-500" />
+                      <span className="text-xs">{suggestion.food.category}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleReject(idx)}
+                      className="text-xs"
+                    >
+                      <X className="size-3 mr-1" />
+                      No
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-orange-600 hover:bg-orange-700 text-xs"
+                      onClick={() => handleAccept(suggestion, true)}
+                    >
+                      <ThumbsUp className="size-3 mr-1" />
+                      Ordenar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
 
       <Card className="bg-amber-50 border-amber-200">
         <CardContent className="p-4">

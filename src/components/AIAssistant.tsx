@@ -122,29 +122,13 @@ export function AIAssistant({ profile, setProfile, onClose }: AIAssistantProps) 
     <div className="flex flex-col h-[70vh]">
       {/* Messages Area */}
       <div 
-        className="flex-1 p-4 overflow-y-auto" 
+        className="flex-1 p-4 overflow-y-auto ai-messages-container" 
         ref={messagesContainerRef}
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#9333ea #f3f4f6'
         }}
       >
-        <style jsx>{`
-          div::-webkit-scrollbar {
-            width: 8px;
-          }
-          div::-webkit-scrollbar-track {
-            background: #f3f4f6;
-            border-radius: 4px;
-          }
-          div::-webkit-scrollbar-thumb {
-            background: #9333ea;
-            border-radius: 4px;
-          }
-          div::-webkit-scrollbar-thumb:hover {
-            background: #7e22ce;
-          }
-        `}</style>
         <div className="space-y-4">
           {messages.map((message) => (
             <div

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { UserPreferences } from "../App";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -38,33 +39,36 @@ const commonRestrictions = [
 ];
 
 export function PreferencesForm({ preferences, setPreferences }: PreferencesFormProps) {
+  const [localPreferences, setLocalPreferences] = useState<UserPreferences>(preferences);
+
   const toggleCategory = (category: string) => {
-    const updated = preferences.favoriteCategories.includes(category)
-      ? preferences.favoriteCategories.filter((c) => c !== category)
-      : [...preferences.favoriteCategories, category];
+    const updated = localPreferences.favoriteCategories.includes(category)
+      ? localPreferences.favoriteCategories.filter((c) => c !== category)
+      : [...localPreferences.favoriteCategories, category];
     
-    setPreferences({ ...preferences, favoriteCategories: updated });
+    setLocalPreferences({ ...localPreferences, favoriteCategories: updated });
   };
 
   const toggleRestriction = (restriction: string) => {
-    const updated = preferences.restrictions.includes(restriction)
-      ? preferences.restrictions.filter((r) => r !== restriction)
-      : [...preferences.restrictions, restriction];
+    const updated = localPreferences.restrictions.includes(restriction)
+      ? localPreferences.restrictions.filter((r) => r !== restriction)
+      : [...localPreferences.restrictions, restriction];
     
-    setPreferences({ ...preferences, restrictions: updated });
+    setLocalPreferences({ ...localPreferences, restrictions: updated });
   };
 
   const handleBudgetChange = (newBudget: number) => {
-    setPreferences({ ...preferences, budgetPerMeal: newBudget });
+    setLocalPreferences({ ...localPreferences, budgetPerMeal: newBudget });
   };
 
   const handleSwitchChange = (field: 'allowEatingWhileWalking' | 'allowEatingInClass', value: boolean) => {
-    setPreferences({ ...preferences, [field]: value });
+    setLocalPreferences({ ...localPreferences, [field]: value });
   };
 
   const handleSave = () => {
+    setPreferences(localPreferences);
     toast.success("Preferencias guardadas correctamente", {
-      description: "Las sugerencias se actualizarán automáticamente",
+      description: "Vuelve a 'Sugerencias' para ver las opciones actualizadas",
     });
   };
 
@@ -89,9 +93,9 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
             {availableCategories.map((category) => (
               <Badge
                 key={category}
-                variant={preferences.favoriteCategories.includes(category) ? "default" : "outline"}
+                variant={localPreferences.favoriteCategories.includes(category) ? "default" : "outline"}
                 className={`cursor-pointer transition-colors text-xs ${
-                  preferences.favoriteCategories.includes(category)
+                  localPreferences.favoriteCategories.includes(category)
                     ? "bg-orange-600 hover:bg-orange-700"
                     : "hover:bg-orange-50"
                 }`}
@@ -118,9 +122,9 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
             {commonRestrictions.map((restriction) => (
               <Badge
                 key={restriction}
-                variant={preferences.restrictions.includes(restriction) ? "default" : "outline"}
+                variant={localPreferences.restrictions.includes(restriction) ? "default" : "outline"}
                 className={`cursor-pointer transition-colors text-xs ${
-                  preferences.restrictions.includes(restriction)
+                  localPreferences.restrictions.includes(restriction)
                     ? "bg-red-600 hover:bg-red-700"
                     : "hover:bg-red-50"
                 }`}
@@ -152,7 +156,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
               type="number"
               min="0"
               step="5"
-              value={preferences.budgetPerMeal}
+              value={localPreferences.budgetPerMeal}
               onChange={(e) =>
                 handleBudgetChange(Number(e.target.value))
               }
@@ -162,7 +166,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
           </div>
           <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
             <p className="text-xs text-gray-600">Presupuesto promedio</p>
-            <p className="text-sm text-green-700">S/ {preferences.budgetPerMeal}</p>
+            <p className="text-sm text-green-700">S/ {localPreferences.budgetPerMeal}</p>
           </div>
         </CardContent>
       </Card>
@@ -189,7 +193,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
             </div>
             <Switch
               id="walking"
-              checked={preferences.allowEatingWhileWalking}
+              checked={localPreferences.allowEatingWhileWalking}
               onCheckedChange={(checked) =>
                 handleSwitchChange('allowEatingWhileWalking', checked)
               }
@@ -208,7 +212,7 @@ export function PreferencesForm({ preferences, setPreferences }: PreferencesForm
             </div>
             <Switch
               id="class"
-              checked={preferences.allowEatingInClass}
+              checked={localPreferences.allowEatingInClass}
               onCheckedChange={(checked) =>
                 handleSwitchChange('allowEatingInClass', checked)
               }

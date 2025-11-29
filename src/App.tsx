@@ -124,9 +124,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 pb-20 overflow-x-hidden">
       <Toaster position="top-center" richColors />
-      <div className="container mx-auto p-3 max-w-md">
+      <div className="container mx-auto p-3 max-w-md overflow-x-hidden">
         {/* Header */}
         <div className="mb-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -143,8 +143,8 @@ export default function App() {
           <TabsContent value="suggestions" className="mt-0">
             {/* Personalized Greeting - only shown in Suggestions tab */}
             <div className="text-center mb-4">
-              <p className="text-lg">
-                ¡Hola{profile.name ? `, ${profile.name}` : ""}! 👋
+              <p className="text-lg font-normal">
+                ¡Hola{profile.name ? `, ${profile.name}` : ""}!
               </p>
             </div>
             <MealSuggestions
