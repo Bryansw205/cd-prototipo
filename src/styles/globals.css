@@ -505,10 +505,10 @@ html {
 }
 
 .ai-messages-container::-webkit-scrollbar-thumb {
-  background: #9333ea;
+  background: #F97316;
   border-radius: 4px;
 }
 
 .ai-messages-container::-webkit-scrollbar-thumb:hover {
-  background: #7e22ce;
+  background: #EA580C;
 }

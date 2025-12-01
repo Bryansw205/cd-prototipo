@@ -72,10 +72,10 @@ export default function App() {
 
   // Load data from localStorage
   useEffect(() => {
-    const savedEvents = localStorage.getItem("chef-fantasma-events");
-    const savedPreferences = localStorage.getItem("chef-fantasma-preferences");
-    const savedHistory = localStorage.getItem("chef-fantasma-history");
-    const savedProfile = localStorage.getItem("chef-fantasma-profile");
+    const savedEvents = localStorage.getItem("ghosthy-events");
+    const savedPreferences = localStorage.getItem("ghosthy-preferences");
+    const savedHistory = localStorage.getItem("ghosthy-history");
+    const savedProfile = localStorage.getItem("ghosthy-profile");
 
     if (savedEvents) setEvents(JSON.parse(savedEvents));
     else {
@@ -89,7 +89,7 @@ export default function App() {
         { id: "5", title: "Gimnasio", startTime: "18:00", endTime: "19:00", date: today },
       ];
       setEvents(demoEvents);
-      localStorage.setItem("chef-fantasma-events", JSON.stringify(demoEvents));
+      localStorage.setItem("ghosthy-events", JSON.stringify(demoEvents));
     }
 
     if (savedPreferences) setPreferences(JSON.parse(savedPreferences));
@@ -99,19 +99,19 @@ export default function App() {
 
   // Save to localStorage when data changes
   useEffect(() => {
-    localStorage.setItem("chef-fantasma-events", JSON.stringify(events));
+    localStorage.setItem("ghosthy-events", JSON.stringify(events));
   }, [events]);
 
   useEffect(() => {
-    localStorage.setItem("chef-fantasma-preferences", JSON.stringify(preferences));
+    localStorage.setItem("ghosthy-preferences", JSON.stringify(preferences));
   }, [preferences]);
 
   useEffect(() => {
-    localStorage.setItem("chef-fantasma-history", JSON.stringify(history));
+    localStorage.setItem("ghosthy-history", JSON.stringify(history));
   }, [history]);
 
   useEffect(() => {
-    localStorage.setItem("chef-fantasma-profile", JSON.stringify(profile));
+    localStorage.setItem("ghosthy-profile", JSON.stringify(profile));
   }, [profile]);
 
   const addToHistory = (entry: MealHistory) => {
@@ -131,7 +131,7 @@ export default function App() {
         <div className="mb-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
             <UtensilsCrossed className="size-8 text-orange-600" />
-            <h1 className="text-orange-600">Chef Fantasma</h1>
+            <h1 className="text-orange-600">GhosThy</h1>
           </div>
           <p className="text-sm text-gray-600">
             Tu asistente inteligente de alimentación

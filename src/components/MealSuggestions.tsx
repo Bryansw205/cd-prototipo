@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame, Leaf, Coins, User, Bot } from "lucide-react";
+import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame, Leaf, Coins, User, Bot, Ghost } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { ProfileForm } from "./ProfileForm";
-import { AIAssistant } from "./AIAssistant";
+import AIAssistant from "./AIAssistant";
 import { toast } from "sonner@2.0.3";
 import {
   Carousel,
@@ -359,16 +359,20 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
             className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50"
             size="icon"
           >
-            <Bot className="size-6" />
+            <Ghost className="size-6" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl p-0 gap-0 max-h-[85vh] overflow-hidden">
-          <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+        <DialogContent
+          className="max-w-2xl p-0 gap-0 max-h-[85vh] flex flex-col"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-orange-50 to-pink-50">
             <DialogTitle className="flex items-center gap-2">
-              <Bot className="size-5 text-purple-600" />
+              <Ghost className="size-5 text-orange-600" />
               Asistente Virtual con IA
             </DialogTitle>
-            <DialogDescription className="text-purple-700">
+            <DialogDescription className="text-orange-700">
               Consulta sobre alimentación, nutrición y recomendaciones personalizadas
             </DialogDescription>
           </DialogHeader>
