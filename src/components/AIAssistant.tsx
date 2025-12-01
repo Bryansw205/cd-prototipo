@@ -4,7 +4,7 @@ import { Toaster, toast } from "sonner";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 
-const GEMINI_API_KEY = "AIzaSyBafzyiORdm2dVI-yjc8i6Fo38psE8UTA0"; 
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; 
 
 // --- COMPONENTES UI ---
 
