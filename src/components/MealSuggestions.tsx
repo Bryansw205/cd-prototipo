@@ -353,36 +353,26 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
       </Dialog>
 
       {/* Floating AI Assistant Button - Bottom Right */}
-      <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
-        <DialogTrigger asChild>
-          <Button
-            className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50"
-            size="icon"
-          >
-            <Ghost className="size-6" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent
-          className="max-w-2xl p-0 gap-0 max-h-[85vh] flex flex-col"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-        >
-          <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-orange-50 to-pink-50">
-            <DialogTitle className="flex items-center gap-2">
-              <Ghost className="size-5 text-orange-600" />
-              Asistente Virtual con IA
-            </DialogTitle>
-            <DialogDescription className="text-orange-700">
-              Consulta sobre alimentación, nutrición y recomendaciones personalizadas
-            </DialogDescription>
-          </DialogHeader>
-          <AIAssistant 
-            profile={profile} 
-            setProfile={setProfile}
-            onClose={() => setIsAIDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      {isAIDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+           <div className="w-full max-w-md animate-in zoom-in-95 duration-200">
+              <AIAssistant 
+                profile={profile} 
+                setProfile={setProfile}
+                onClose={() => setIsAIDialogOpen(false)}
+              />
+           </div>
+        </div>
+      )}
+
+      {/* Trigger Button - Toggle Manual */}
+      <Button
+        className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50"
+        size="icon"
+        onClick={() => setIsAIDialogOpen(!isAIDialogOpen)}
+      >
+        <Ghost className="size-6" />
+      </Button>
 
       <div className="text-center mb-4">
         <h2 className="mb-1">Sugerencias de hoy</h2>
