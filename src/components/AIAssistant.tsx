@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, Ghost, Send, Loader2, User, X } from "lucide-react";
+import { Ghost, Send, Loader2, User, X } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; 
+// Eliminamos la declaración top-level que causaba el error
+// const GEMINI_API_KEY = ... 
 
 // --- COMPONENTES UI ---
 
@@ -70,7 +70,6 @@ export default function AIAssistant({
   setProfile, 
   onClose 
 }: AIAssistantProps) {
-  // Configuración del mensaje inicial según la imagen adjunta
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -97,52 +96,37 @@ export default function AIAssistant({
     }
   };
 
-  // --- LÓGICA ROBUSTA CON RETRIES Y FALLBACKS ---
   const generateAIResponse = async (userInput: string): Promise<string> => {
-    let apiKey = GEMINI_API_KEY;
+    let apiKey = "";
     
+    // Intento seguro de acceder a la variable de entorno dentro de la función
     try {
         // @ts-ignore
-        if (!apiKey && typeof import.meta !== 'undefined' && import.meta.env) {
-            // @ts-ignore
+        if (typeof import.meta !== 'undefined' && import.meta.env) {
             apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         }
     } catch (e) {}
 
-    if (!apiKey) throw new Error("Faltan credenciales.");
+    if (!apiKey) throw new Error("Faltan credenciales (API Key no encontrada).");
 
-    // PROMPT ACTUALIZADO: PERSONALIDAD DE NUTRICIÓN (SIN FANTASMAS)
     const promptText = `
         ROL: Eres "Ghosthy", un asistente virtual experto en nutrición y bienestar para la plataforma "Ghosthy".
-        
         DIRECTRICES DE PERSONALIDAD:
         1. Eres profesional, amable y empático.
-        2. IMPORTANTE: Aunque te llamas "Ghosthy", NO hagas chistes de fantasmas, ni uses palabras como "espeluznante", "miedo" o emojis de fantasmas. Actúa como un nutricionista humano y profesional.
+        2. IMPORTANTE: Aunque te llamas "Ghosthy", NO hagas chistes de fantasmas. Actúa como un nutricionista humano y profesional.
         3. Tus respuestas deben ser prácticas, basadas en hábitos saludables.
-        
         PERFIL DEL USUARIO:
         Nombre: ${profile.name || "Invitado"}
         Datos conocidos: ${JSON.stringify(profile)}
-        
         CONSULTA ACTUAL: "${userInput}"
-        
         INSTRUCCIÓN: Responde a la consulta de forma concisa y útil. Usa emojis neutros o de comida (🥗, 🍎, 💪) si es necesario para dar calidez, pero mantén el profesionalismo.
     `;
 
-    // Lista de modelos a probar en orden
-    const MODELS_TO_TRY = [
-        "gemini-3-pro-preview",
-        "gemini-pro",
-        "gemini-2.5-pro",
-        "gemini-2.5-flash"
-    ];
-
+    const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
     let lastError = null;
 
-    // Iteramos sobre los modelos disponibles
     for (const modelName of MODELS_TO_TRY) {
         try {
-            // 1. INTENTO CON SDK
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: modelName });
@@ -150,35 +134,24 @@ export default function AIAssistant({
                 const response = await result.response;
                 return response.text();
             } catch (sdkError: any) {
-                 // Si falla el SDK, probamos REST para este mismo modelo
                  console.warn(`SDK falló con ${modelName}, probando REST...`);
-                 
                  const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }] }]
-                        })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                     }
                 );
-                
                 const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error?.message || `REST Error: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(data.error?.message || `REST Error: ${response.status}`);
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
             }
-
         } catch (error: any) {
             console.warn(`Fallo con ${modelName}: ${error.message}`);
             lastError = error;
         }
     }
-
     throw new Error(`No se pudo conectar con ningún modelo. Último error: ${lastError?.message}`);
   };
 
@@ -198,21 +171,17 @@ export default function AIAssistant({
 
     try {
       const aiResponse = await generateAIResponse(inputMessage);
-      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: aiResponse,
         timestamp: new Date().toISOString(),
       };
-      
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
       console.error(error);
-      
       let errorMsg = error.message;
       if (errorMsg.includes("404")) errorMsg = "Modelo no encontrado (404).";
-      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -234,21 +203,30 @@ export default function AIAssistant({
   };
 
   return (
-    <div className="flex flex-col h-[90vh] md:h-[80vh] w-full md:max-w-md mx-auto bg-white rounded-none md:rounded-xl shadow-xl overflow-hidden border-gray-200 font-sans relative">
+    <div className="flex flex-col h-[85vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 font-sans relative">
       <style>
         {`
+          /* Scrollbar personalizado completo */
+          .ai-messages-container::-webkit-scrollbar {
+            width: 8px; /* Ancho necesario para que se vea */
+          }
+          .ai-messages-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
           .ai-messages-container::-webkit-scrollbar-thumb {
-            background: #F97316 !important;
+            background: #F97316; /* Naranja */
+            border-radius: 4px;
           }
           .ai-messages-container::-webkit-scrollbar-thumb:hover {
-            background: #EA580C !important;
+            background: #EA580C;
           }
         `}
       </style>
       <Toaster position="top-center" />
       
       {/* Header */}
-      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10">
+      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0">
         <div className="flex items-center gap-2">
             <div className="bg-white/20 p-1.5 rounded-full">
                 <Ghost size={20} className="text-white" />
@@ -268,7 +246,8 @@ export default function AIAssistant({
       </div>
 
       {/* Área de Mensajes */}
-      <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50 min-h-0">
+      {/* overscroll-contain evita que se mueva la página de fondo */}
+      <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50 overscroll-contain">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -300,7 +279,7 @@ export default function AIAssistant({
                         ? "bg-red-50 text-red-800 border border-red-200 rounded-tl-none"
                         : message.role === "user"
                             ? "bg-orange-500 text-black rounded-tr-none"
-                            : "bg-orange-500 text-gray-800 border border-gray-200 rounded-tl-none"
+                            : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
                   }`}
                 >
                   <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -328,13 +307,13 @@ export default function AIAssistant({
       </div>
 
       {/* Área de Input */}
-      <div className="p-3 bg-white border-t border-gray-100">
+      <div className="p-3 bg-white border-t border-gray-100 shrink-0">
         <div className="flex gap-2 items-center bg-gray-50 p-1.5 rounded-full border border-gray-200 focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all">
           <Input
             value={inputMessage}
             onChange={(e: any) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Pregunta sobre nutrición, dietas, calorías..."
+            placeholder="Pregunta sobre nutrición..."
             className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-sm h-9"
             disabled={isLoading}
           />
@@ -355,7 +334,7 @@ export default function AIAssistant({
           </Button>
         </div>
         <p className="text-[10px] text-center text-gray-400 mt-2">
-           Ghosthy es una IA en desarrollo • Puede cometer errores
+            Ghosthy es una IA en desarrollo • Puede cometer errores
         </p>
       </div>
     </div>
