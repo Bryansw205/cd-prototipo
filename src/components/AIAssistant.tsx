@@ -78,6 +78,7 @@ export default function AIAssistant({
   
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,7 +93,10 @@ export default function AIAssistant({
     }
   };
 
+  // --- LÓGICA ROBUSTA CON RETRIES Y FALLBACKS ---
   const generateAIResponse = async (userInput: string): Promise<string> => {
+    // 🔒 LECTURA SEGURA DE VARIABLE DE ENTORNO
+    // Se hace dentro de la función y con try-catch para evitar errores de compilación
     let apiKey = "";
     try {
         // @ts-ignore
@@ -101,8 +105,9 @@ export default function AIAssistant({
         }
     } catch (e) {}
 
-    if (!apiKey) throw new Error("Faltan credenciales (API Key no encontrada).");
+    if (!apiKey) throw new Error("Faltan credenciales (API Key no configurada en .env).");
 
+    // PROMPT ACTUALIZADO: PERSONALIDAD DE NUTRICIÓN (SIN FANTASMAS)
     const promptText = `
         ROL: Eres "Ghosthy", un asistente virtual experto en nutrición y bienestar para la plataforma "Ghosthy".
         DIRECTRICES DE PERSONALIDAD:
@@ -116,34 +121,56 @@ export default function AIAssistant({
         INSTRUCCIÓN: Responde a la consulta de forma concisa y útil. Usa emojis neutros o de comida (🥗, 🍎, 💪) si es necesario para dar calidez, pero mantén el profesionalismo.
     `;
 
-    const MODELS = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
-    
-    for (const modelName of MODELS) {
+    // Lista de modelos a probar en orden
+    const MODELS_TO_TRY = [
+        "gemini-1.5-flash",
+        "gemini-3-pro-preview",
+        "gemini-pro",
+        "gemini-2.5-flash"
+    ];
+
+    let lastError = null;
+
+    // Iteramos sobre los modelos disponibles
+    for (const modelName of MODELS_TO_TRY) {
         try {
+            // 1. INTENTO CON SDK
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: modelName });
                 const result = await model.generateContent(promptText);
                 const response = await result.response;
                 return response.text();
-            } catch (sdkError) {
+            } catch (sdkError: any) {
+                 console.warn(`SDK falló con ${modelName}, probando REST...`);
+                 
                  const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }] }]
+                        })
                     }
                 );
+                
                 const data = await response.json();
-                if (!response.ok) throw new Error("REST Error");
+                
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `REST Error: ${response.status}`);
+                }
+
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
             }
-        } catch (e) {
-            continue; 
+
+        } catch (error: any) {
+            console.warn(`Fallo con ${modelName}: ${error.message}`);
+            lastError = error;
         }
     }
-    throw new Error("No se pudo conectar con Ghosthy.");
+
+    throw new Error(`No se pudo conectar con ningún modelo. Último error: ${lastError?.message}`);
   };
 
   const handleSendMessage = async () => {
@@ -162,18 +189,25 @@ export default function AIAssistant({
 
     try {
       const aiResponse = await generateAIResponse(inputMessage);
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: aiResponse,
         timestamp: new Date().toISOString(),
       };
+      
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
+      console.error(error);
+      
+      let errorMsg = error.message;
+      if (errorMsg.includes("404")) errorMsg = "Modelo no encontrado (404).";
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `🚫 ${error.message}`,
+        content: `🚫 Error: ${errorMsg}`,
         timestamp: new Date().toISOString(),
         isError: true
       };
@@ -191,37 +225,35 @@ export default function AIAssistant({
   };
 
   return (
-    <div className="flex flex-col h-[85vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
-      {/* CSS SCROLLBAR FIX:
-         - Agregado scrollbar-color para Firefox.
-         - Selectores Webkit más específicos y con !important para asegurar que sobrescriban defaults.
-      */}
+    <div className="flex flex-col h-[80vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
       <style>
         {`
-          .custom-scrollbar {
+          /* Forzamos el estilo del scrollbar con selectores específicos y !important */
+          .ai-messages-container {
             scrollbar-width: thin;
-            scrollbar-color: #ea580c #f8fafc;
+            scrollbar-color: #ea580c transparent;
           }
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+          .ai-messages-container::-webkit-scrollbar {
+            width: 8px !important;
+            height: 8px !important;
           }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f8fafc;
+          .ai-messages-container::-webkit-scrollbar-track {
+            background: transparent !important;
           }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #ea580c;
-            border-radius: 20px;
-            border: 2px solid #f8fafc;
+          .ai-messages-container::-webkit-scrollbar-thumb {
+            background-color: #ea580c !important; /* Orange 600 */
+            border-radius: 10px !important;
+            border: 2px solid #ffffff !important; /* Borde blanco para efecto flotante */
           }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: #c2410c;
+          .ai-messages-container::-webkit-scrollbar-thumb:hover {
+            background-color: #c2410c !important; /* Orange 700 */
           }
         `}
       </style>
       <Toaster position="top-center" />
       
       {/* Header */}
-      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0 shadow-md">
+      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0">
         <div className="flex items-center gap-2">
             <div className="bg-white/20 p-1.5 rounded-full">
                 <Ghost size={20} className="text-white" />
@@ -233,18 +265,16 @@ export default function AIAssistant({
         </div>
         <div className="flex gap-2">
             {onClose && (
-                <button onClick={onClose} className="text-white/80 hover:text-white hover:bg-white/20 p-1 rounded-full transition-all">
-                    <X size={20} />
+                <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
+                    <X size={18} />
                 </button>
             )}
         </div>
       </div>
 
-      {/* Área de Mensajes:
-         - min-h-0: CRÍTICO para evitar que Flexbox expanda el contenedor infinitamente (la deformación).
-         - custom-scrollbar: Clase personalizada para el scroll naranja.
-      */}
-      <div className="flex-1 min-h-0 p-4 overflow-y-auto custom-scrollbar bg-slate-50 overscroll-contain">
+      {/* Área de Mensajes */}
+      {/* min-h-0 es VITAL para que flexbox no expanda el contenedor infinitamente */}
+      <div className="flex-1 min-h-0 p-4 overflow-y-auto ai-messages-container bg-slate-50">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -271,7 +301,7 @@ export default function AIAssistant({
                 }`}
               >
                 <div
-                  className={`rounded-2xl px-4 py-2 shadow-sm text-sm ${
+                  className={`rounded-2xl px-4 py-2 shadow-sm text-sm break-words ${
                     message.isError
                         ? "bg-red-50 text-red-800 border border-red-200 rounded-tl-none"
                         : message.role === "user"
@@ -295,7 +325,7 @@ export default function AIAssistant({
               </div>
               <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="size-4 text-orange-600 animate-spin" />
-                <span className="text-xs text-gray-500 animate-pulse">Analizando...</span>
+                <span className="text-xs text-gray-500 animate-pulse">Ghosthy está analizando tu consulta...</span>
               </div>
             </div>
           )}
