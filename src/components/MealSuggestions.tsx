@@ -9,7 +9,7 @@ import { Clock, DollarSign, MapPin, ThumbsUp, ThumbsDown, X, Check, Bike, Flame,
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { ProfileForm } from "./ProfileForm";
 import AIAssistant from "./AIAssistant";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import {
   Carousel,
   CarouselContent,

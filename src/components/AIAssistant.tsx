@@ -268,7 +268,7 @@ export default function AIAssistant({
       </div>
 
       {/* Área de Mensajes */}
-      <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50">
+      <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50 min-h-0">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
