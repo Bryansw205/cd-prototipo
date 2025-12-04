@@ -3,10 +3,7 @@ import { Ghost, Send, Loader2, User, X } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Eliminamos la declaración top-level que causaba el error
-// const GEMINI_API_KEY = ... 
-
-// --- COMPONENTES UI ---
+// --- COMPONENTES UI INTERNOS ---
 
 const Button = ({ className = "", variant = "primary", size = "default", ...props }: any) => {
   const baseStyles = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
@@ -81,7 +78,6 @@ export default function AIAssistant({
   
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,9 +93,8 @@ export default function AIAssistant({
   };
 
   const generateAIResponse = async (userInput: string): Promise<string> => {
+    // 🔒 Lectura segura de la API Key
     let apiKey = "";
-    
-    // Intento seguro de acceder a la variable de entorno dentro de la función
     try {
         // @ts-ignore
         if (typeof import.meta !== 'undefined' && import.meta.env) {
@@ -111,21 +106,18 @@ export default function AIAssistant({
 
     const promptText = `
         ROL: Eres "Ghosthy", un asistente virtual experto en nutrición y bienestar para la plataforma "Ghosthy".
-        DIRECTRICES DE PERSONALIDAD:
-        1. Eres profesional, amable y empático.
-        2. IMPORTANTE: Aunque te llamas "Ghosthy", NO hagas chistes de fantasmas. Actúa como un nutricionista humano y profesional.
-        3. Tus respuestas deben ser prácticas, basadas en hábitos saludables.
-        PERFIL DEL USUARIO:
-        Nombre: ${profile.name || "Invitado"}
-        Datos conocidos: ${JSON.stringify(profile)}
-        CONSULTA ACTUAL: "${userInput}"
-        INSTRUCCIÓN: Responde a la consulta de forma concisa y útil. Usa emojis neutros o de comida (🥗, 🍎, 💪) si es necesario para dar calidez, pero mantén el profesionalismo.
+        DIRECTRICES:
+        1. Profesional, amable y empático.
+        2. NO hagas chistes de fantasmas.
+        3. Respuestas prácticas sobre hábitos saludables.
+        PERFIL USUARIO: Nombre: ${profile.name || "Invitado"}, Datos: ${JSON.stringify(profile)}
+        CONSULTA: "${userInput}"
+        INSTRUCCIÓN: Responde concisa y útilmente con emojis neutros (🥗, 🍎).
     `;
 
-    const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
-    let lastError = null;
-
-    for (const modelName of MODELS_TO_TRY) {
+    const MODELS = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
+    
+    for (const modelName of MODELS) {
         try {
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
@@ -133,8 +125,8 @@ export default function AIAssistant({
                 const result = await model.generateContent(promptText);
                 const response = await result.response;
                 return response.text();
-            } catch (sdkError: any) {
-                 console.warn(`SDK falló con ${modelName}, probando REST...`);
+            } catch (sdkError) {
+                 // Fallback REST si falla SDK
                  const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
                     {
@@ -144,15 +136,14 @@ export default function AIAssistant({
                     }
                 );
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error?.message || `REST Error: ${response.status}`);
+                if (!response.ok) throw new Error("REST Error");
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
             }
-        } catch (error: any) {
-            console.warn(`Fallo con ${modelName}: ${error.message}`);
-            lastError = error;
+        } catch (e) {
+            continue; // Prueba siguiente modelo
         }
     }
-    throw new Error(`No se pudo conectar con ningún modelo. Último error: ${lastError?.message}`);
+    throw new Error("No se pudo conectar con Ghosthy.");
   };
 
   const handleSendMessage = async () => {
@@ -179,13 +170,10 @@ export default function AIAssistant({
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
-      console.error(error);
-      let errorMsg = error.message;
-      if (errorMsg.includes("404")) errorMsg = "Modelo no encontrado (404).";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `🚫 Error: ${errorMsg}`,
+        content: `🚫 ${error.message}`,
         timestamp: new Date().toISOString(),
         isError: true
       };
@@ -203,30 +191,37 @@ export default function AIAssistant({
   };
 
   return (
-    <div className="flex flex-col h-[85vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 font-sans relative">
+    <div className="flex flex-col h-[85vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
+      {/* Estilos CSS forzados para el scrollbar */}
       <style>
         {`
-          /* Scrollbar personalizado completo */
+          /* Estilo para Chrome, Edge, Safari */
           .ai-messages-container::-webkit-scrollbar {
-            width: 8px; /* Ancho necesario para que se vea */
+            width: 10px !important;
           }
           .ai-messages-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+            background: transparent !important;
           }
           .ai-messages-container::-webkit-scrollbar-thumb {
-            background: #F97316; /* Naranja */
-            border-radius: 4px;
+            background-color: #ea580c !important; /* Orange-600 */
+            border-radius: 20px !important;
+            border: 3px solid #ffffff !important; /* Borde blanco para efecto flotante */
           }
           .ai-messages-container::-webkit-scrollbar-thumb:hover {
-            background: #EA580C;
+            background-color: #c2410c !important; /* Orange-700 */
+          }
+
+          /* Estilo para Firefox */
+          .ai-messages-container {
+            scrollbar-width: thin !important;
+            scrollbar-color: #ea580c transparent !important;
           }
         `}
       </style>
       <Toaster position="top-center" />
       
       {/* Header */}
-      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0">
+      <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0 shadow-md">
         <div className="flex items-center gap-2">
             <div className="bg-white/20 p-1.5 rounded-full">
                 <Ghost size={20} className="text-white" />
@@ -238,15 +233,14 @@ export default function AIAssistant({
         </div>
         <div className="flex gap-2">
             {onClose && (
-                <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
-                    <X size={18} />
+                <button onClick={onClose} className="text-white/80 hover:text-white hover:bg-white/20 p-1 rounded-full transition-all">
+                    <X size={20} />
                 </button>
             )}
         </div>
       </div>
 
-      {/* Área de Mensajes */}
-      {/* overscroll-contain evita que se mueva la página de fondo */}
+      {/* Área de Mensajes con Scroll Personalizado */}
       <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50 overscroll-contain">
         <div className="space-y-4">
           {messages.map((message) => (
@@ -298,7 +292,7 @@ export default function AIAssistant({
               </div>
               <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="size-4 text-orange-600 animate-spin" />
-                <span className="text-xs text-gray-500 animate-pulse">Ghosthy está analizando tu consulta...</span>
+                <span className="text-xs text-gray-500 animate-pulse">Analizando...</span>
               </div>
             </div>
           )}
