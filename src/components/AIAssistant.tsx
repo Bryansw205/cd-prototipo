@@ -93,7 +93,6 @@ export default function AIAssistant({
   };
 
   const generateAIResponse = async (userInput: string): Promise<string> => {
-    // 🔒 Lectura segura de la API Key
     let apiKey = "";
     try {
         // @ts-ignore
@@ -106,13 +105,15 @@ export default function AIAssistant({
 
     const promptText = `
         ROL: Eres "Ghosthy", un asistente virtual experto en nutrición y bienestar para la plataforma "Ghosthy".
-        DIRECTRICES:
-        1. Profesional, amable y empático.
-        2. NO hagas chistes de fantasmas.
-        3. Respuestas prácticas sobre hábitos saludables.
-        PERFIL USUARIO: Nombre: ${profile.name || "Invitado"}, Datos: ${JSON.stringify(profile)}
-        CONSULTA: "${userInput}"
-        INSTRUCCIÓN: Responde concisa y útilmente con emojis neutros (🥗, 🍎).
+        DIRECTRICES DE PERSONALIDAD:
+        1. Eres profesional, amable y empático.
+        2. IMPORTANTE: Aunque te llamas "Ghosthy", NO hagas chistes de fantasmas. Actúa como un nutricionista humano y profesional.
+        3. Tus respuestas deben ser prácticas, basadas en hábitos saludables.
+        PERFIL DEL USUARIO:
+        Nombre: ${profile.name || "Invitado"}
+        Datos conocidos: ${JSON.stringify(profile)}
+        CONSULTA ACTUAL: "${userInput}"
+        INSTRUCCIÓN: Responde a la consulta de forma concisa y útil. Usa emojis neutros o de comida (🥗, 🍎, 💪) si es necesario para dar calidez, pero mantén el profesionalismo.
     `;
 
     const MODELS = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
@@ -126,7 +127,6 @@ export default function AIAssistant({
                 const response = await result.response;
                 return response.text();
             } catch (sdkError) {
-                 // Fallback REST si falla SDK
                  const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
                     {
@@ -140,7 +140,7 @@ export default function AIAssistant({
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
             }
         } catch (e) {
-            continue; // Prueba siguiente modelo
+            continue; 
         }
     }
     throw new Error("No se pudo conectar con Ghosthy.");
@@ -192,29 +192,29 @@ export default function AIAssistant({
 
   return (
     <div className="flex flex-col h-[85vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
-      {/* Estilos CSS forzados para el scrollbar */}
+      {/* CSS SCROLLBAR FIX:
+         - Agregado scrollbar-color para Firefox.
+         - Selectores Webkit más específicos y con !important para asegurar que sobrescriban defaults.
+      */}
       <style>
         {`
-          /* Estilo para Chrome, Edge, Safari */
-          .ai-messages-container::-webkit-scrollbar {
-            width: 10px !important;
+          .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #ea580c #f8fafc;
           }
-          .ai-messages-container::-webkit-scrollbar-track {
-            background: transparent !important;
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
           }
-          .ai-messages-container::-webkit-scrollbar-thumb {
-            background-color: #ea580c !important; /* Orange-600 */
-            border-radius: 20px !important;
-            border: 3px solid #ffffff !important; /* Borde blanco para efecto flotante */
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f8fafc;
           }
-          .ai-messages-container::-webkit-scrollbar-thumb:hover {
-            background-color: #c2410c !important; /* Orange-700 */
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #ea580c;
+            border-radius: 20px;
+            border: 2px solid #f8fafc;
           }
-
-          /* Estilo para Firefox */
-          .ai-messages-container {
-            scrollbar-width: thin !important;
-            scrollbar-color: #ea580c transparent !important;
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #c2410c;
           }
         `}
       </style>
@@ -240,8 +240,11 @@ export default function AIAssistant({
         </div>
       </div>
 
-      {/* Área de Mensajes con Scroll Personalizado */}
-      <div className="flex-1 p-4 overflow-y-auto ai-messages-container bg-slate-50 overscroll-contain">
+      {/* Área de Mensajes:
+         - min-h-0: CRÍTICO para evitar que Flexbox expanda el contenedor infinitamente (la deformación).
+         - custom-scrollbar: Clase personalizada para el scroll naranja.
+      */}
+      <div className="flex-1 min-h-0 p-4 overflow-y-auto custom-scrollbar bg-slate-50 overscroll-contain">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
