@@ -234,7 +234,7 @@ export default function AIAssistant({
   };
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 font-sans relative">
+    <div className="flex flex-col h-[90vh] md:h-[80vh] w-full md:max-w-md mx-auto bg-white rounded-none md:rounded-xl shadow-xl overflow-hidden border-gray-200 font-sans relative">
       <style>
         {`
           .ai-messages-container::-webkit-scrollbar-thumb {
