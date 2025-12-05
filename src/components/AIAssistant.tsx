@@ -105,15 +105,13 @@ export default function AIAssistant({
 
     const promptText = `
         ROL: Eres "Ghosthy", un asistente virtual experto en nutrición y bienestar para la plataforma "Ghosthy".
-        DIRECTRICES DE PERSONALIDAD:
-        1. Eres profesional, amable y empático.
-        2. IMPORTANTE: Aunque te llamas "Ghosthy", NO hagas chistes de fantasmas. Actúa como un nutricionista humano y profesional.
-        3. Tus respuestas deben ser prácticas, basadas en hábitos saludables.
-        PERFIL DEL USUARIO:
-        Nombre: ${profile.name || "Invitado"}
-        Datos conocidos: ${JSON.stringify(profile)}
-        CONSULTA ACTUAL: "${userInput}"
-        INSTRUCCIÓN: Responde a la consulta de forma concisa y útil. Usa emojis neutros o de comida (🥗, 🍎, 💪) si es necesario para dar calidez, pero mantén el profesionalismo.
+        DIRECTRICES:
+        1. Profesional, amable y empático.
+        2. NO hagas chistes de fantasmas.
+        3. Respuestas prácticas sobre hábitos saludables.
+        PERFIL USUARIO: Nombre: ${profile.name || "Invitado"}, Datos: ${JSON.stringify(profile)}
+        CONSULTA: "${userInput}"
+        INSTRUCCIÓN: Responde concisa y útilmente con emojis neutros (🥗, 🍎).
     `;
 
     const MODELS = ["gemini-1.5-flash", "gemini-pro", "gemini-2.5-flash"];
@@ -191,33 +189,32 @@ export default function AIAssistant({
   };
 
   return (
-    // CAMBIO 1: h-[80vh] fijo para todo el contenedor y flex-col
-    <div className="flex flex-col h-[80vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
+    // FIX DE DEFORMACIÓN: Usamos h-[600px] como base pero limitado por max-h-[80vh]
+    // Esto asegura que tenga un tamaño sólido pero responsivo.
+    <div className="flex flex-col h-[600px] max-h-[80vh] w-full md:max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans relative">
       <style>
         {`
-          /* Estilo robusto para el scrollbar */
+          /* Scrollbar visible forzado */
           .ai-messages-container {
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: #ea580c #f1f5f9; /* Firefox: thumb track */
+            scrollbar-width: thin;
+            scrollbar-color: #ea580c #f1f5f9;
           }
           .ai-messages-container::-webkit-scrollbar {
-            width: 8px; /* Ancho fijo */
+            width: 8px !important;
+            display: block !important; /* Forzar display */
           }
           .ai-messages-container::-webkit-scrollbar-track {
-            background: #f1f5f9; /* Fondo gris claro */
+            background: #f1f5f9 !important;
           }
           .ai-messages-container::-webkit-scrollbar-thumb {
-            background-color: #ea580c; /* Naranja fuerte */
-            border-radius: 4px; /* Bordes redondeados */
-          }
-          .ai-messages-container::-webkit-scrollbar-thumb:hover {
-            background-color: #c2410c; /* Naranja más oscuro al pasar mouse */
+            background-color: #ea580c !important;
+            border-radius: 4px !important;
           }
         `}
       </style>
       <Toaster position="top-center" />
       
-      {/* CAMBIO 2: shrink-0 evita que el header se aplaste */}
+      {/* Header fijo (shrink-0) */}
       <div className="bg-orange-600 p-4 text-white flex items-center justify-between z-10 shrink-0 shadow-md">
         <div className="flex items-center gap-2">
             <div className="bg-white/20 p-1.5 rounded-full">
@@ -237,7 +234,11 @@ export default function AIAssistant({
         </div>
       </div>
 
-      {/* CAMBIO 3: flex-1 y min-h-0 son CRÍTICOS para el scroll interno y evitar deformación */}
+      {/* SOLUCIÓN SCROLL Y DEFORMACIÓN:
+         flex-1: Ocupa todo el espacio disponible.
+         min-h-0: Permite que el contenedor se encoja si es necesario (crucial para scroll).
+         overflow-y-auto: Habilita el scroll.
+      */}
       <div className="flex-1 min-h-0 p-4 overflow-y-auto ai-messages-container bg-slate-50 overscroll-contain">
         <div className="space-y-4">
           {messages.map((message) => (
@@ -289,7 +290,7 @@ export default function AIAssistant({
               </div>
               <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="size-4 text-orange-600 animate-spin" />
-                <span className="text-xs text-gray-500 animate-pulse">Ghosthy está analizando tu consulta...</span>
+                <span className="text-xs text-gray-500 animate-pulse">Analizando...</span>
               </div>
             </div>
           )}
@@ -297,7 +298,7 @@ export default function AIAssistant({
         </div>
       </div>
 
-      {/* CAMBIO 4: shrink-0 en el footer para que no se aplaste */}
+      {/* Input fijo (shrink-0) */}
       <div className="p-3 bg-white border-t border-gray-100 shrink-0">
         <div className="flex gap-2 items-center bg-gray-50 p-1.5 rounded-full border border-gray-200 focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all">
           <Input

@@ -367,7 +367,7 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
 
       {/* Trigger Button - Toggle Manual */}
       <Button
-        className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50"
+        className="fixed bottom-20 right-4 size-14 rounded-full bg-red-600 hover:bg-orange-600 text-white shadow-lg z-50"
         size="icon"
         onClick={() => setIsAIDialogOpen(!isAIDialogOpen)}
       >
