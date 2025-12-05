@@ -352,9 +352,16 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         </DialogContent>
       </Dialog>
 
-      {/* Floating AI Assistant Button - Bottom Right */}
+      {/* Floating AI Assistant - CENTRADO, FONDO OSCURO Y BLUR (FORZADO) */}
       {isAIDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          style={{ 
+            backgroundColor: "rgba(0, 0, 0, 0.6)", 
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)" // Para soporte en Safari/iOS
+          }}
+        >
            <div className="w-full max-w-md animate-in zoom-in-95 duration-200">
               <AIAssistant 
                 profile={profile} 
@@ -365,14 +372,16 @@ export function MealSuggestions({ events, preferences, profile, setProfile, onAc
         </div>
       )}
 
-      {/* Trigger Button - Toggle Manual */}
-      <Button
-        className="fixed bottom-20 right-4 size-14 rounded-full bg-red-600 hover:bg-orange-600 text-white shadow-lg z-50"
-        size="icon"
-        onClick={() => setIsAIDialogOpen(!isAIDialogOpen)}
-      >
-        <Ghost className="size-6" />
-      </Button>
+      {/* Trigger Button - AHORA SOLO VISIBLE SI EL CHAT ESTÁ CERRADO */}
+      {!isAIDialogOpen && (
+        <Button
+          className="fixed bottom-20 right-4 size-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg z-50 transition-all duration-200 ease-in-out transform hover:scale-105"
+          size="icon"
+          onClick={() => setIsAIDialogOpen(true)}
+        >
+          <Ghost className="size-6" />
+        </Button>
+      )}
 
       <div className="text-center mb-4">
         <h2 className="mb-1">Sugerencias de hoy</h2>
